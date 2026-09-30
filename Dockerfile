@@ -11,12 +11,9 @@ RUN cat FmhyPlugin/FmhyPlugin.csproj
 # Restore with no cache
 RUN dotnet restore FmhyPlugin/FmhyPlugin.csproj --no-cache -v n
 
-# Build
+# Build and publish the plugin assembly.
 WORKDIR /src/FmhyPlugin
-RUN dotnet build -c Release -o /app/build --no-restore -v n
-
-# Publish
-RUN dotnet publish -c Release -o /app/publish --no-build -v n
+RUN dotnet publish -c Release -o /app/publish --no-restore -v n
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
@@ -28,7 +25,7 @@ RUN mkdir -p /plugins/FmhyPlugin/Web
 
 # Copy published files
 COPY --from=build /app/publish/FmhyPlugin.dll /plugins/FmhyPlugin/
-COPY --from=build /app/publish/plugin.json /plugins/FmhyPlugin/
+COPY FmhyPlugin/plugin.json /plugins/FmhyPlugin/
 COPY FmhyPlugin/Web/configuration.html /plugins/FmhyPlugin/Web/
 COPY FmhyPlugin/Web/browse.html /plugins/FmhyPlugin/Web/
 

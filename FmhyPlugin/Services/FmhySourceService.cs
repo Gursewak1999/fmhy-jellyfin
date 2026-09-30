@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using MediaBrowser.Controller.Configuration;
-using MediaBrowser.Model.Serialization;
 using FmhyPlugin.Configuration;
 using FmhyPlugin.Models;
 using HtmlAgilityPack;
@@ -18,7 +17,6 @@ namespace FmhyPlugin.Services
     public class FmhySourceService
     {
         private readonly IServerConfigurationManager _configManager;
-        private readonly IJsonSerializer _jsonSerializer;
         private readonly HttpClient _httpClient;
         private readonly Dictionary<string, List<MovieItem>> _cache;
         private DateTime _lastCacheUpdate;
@@ -499,10 +497,9 @@ namespace FmhyPlugin.Services
             new StreamingSource { Id = "darkroom3", Name = "DarkRoom", Url = "https://www.darkroom.film/", Category = "classics", Description = "Movies / TV / US Only / Requires Sign-Up", Quality = "1080p", HasAutoNext = false }
         };
 
-        public FmhySourceService(IServerConfigurationManager configManager, IJsonSerializer jsonSerializer)
+        public FmhySourceService(IServerConfigurationManager configManager)
         {
             _configManager = configManager;
-            _jsonSerializer = jsonSerializer;
             _cache = new Dictionary<string, List<MovieItem>>();
             _lastCacheUpdate = DateTime.MinValue;
 

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using MediaBrowser.Common.Configuration;
+using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Plugins;
 using MediaBrowser.Model.Serialization;
 using MediaBrowser.Model.Plugins;
@@ -46,7 +48,6 @@ namespace FmhyPlugin
                     EmbeddedResourcePath = "FmhyPlugin.Web.configuration.html",
                     EnableInMainMenu = true,
                     MenuSection = "Plugins",
-                    MenuTitle = "FMHY Movies",
                     DisplayName = "FMHY Free Movies"
                 },
                 new PluginPageInfo
@@ -55,7 +56,6 @@ namespace FmhyPlugin
                     EmbeddedResourcePath = "FmhyPlugin.Web.browse.html",
                     EnableInMainMenu = true,
                     MenuSection = "Plugins",
-                    MenuTitle = "FMHY Browse",
                     DisplayName = "FMHY Browse"
                 }
             };
