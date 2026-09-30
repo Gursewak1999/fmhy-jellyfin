@@ -1,1 +1,18 @@
-.github/workflows/build.yml
+# .github/workflows/build.yml
+name: Build FMHY Plugin
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore FmhyPlugin/FmhyPlugin.csproj
+      - run: dotnet build FmhyPlugin/FmhyPlugin.csproj -c Release
+      - run: dotnet publish FmhyPlugin/FmhyPlugin.csproj -c Release -o output/FmhyPlugin --no-build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FmhyPlugin
+          path: output/FmhyPlugin/
