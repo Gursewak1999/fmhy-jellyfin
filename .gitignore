@@ -1,0 +1,30 @@
+# Build outputs
+bin/
+obj/
+output/
+*.zip
+
+# IDE
+.vs/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# NuGet
+packages/
+*.nupkg
+
+# Test results
+TestResults/
+
+# User-specific
+*.user
+*.suo

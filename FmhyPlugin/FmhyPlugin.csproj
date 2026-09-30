@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>FmhyPlugin</RootNamespace>
+    <AssemblyName>FmhyPlugin</AssemblyName>
+    <Version>1.0.0</Version>
+    <Description>FMHY Free Movies Plugin for Jellyfin</Description>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Jellyfin 10.9.0 - known stable for plugins -->
+    <PackageReference Include="Jellyfin.Model" Version="10.9.0" />
+    <PackageReference Include="Jellyfin.Controller" Version="10.9.0" />
+    <PackageReference Include="Jellyfin.Common" Version="10.9.0" />
+    
+    <!-- HTML parsing -->
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Web\configuration.html" />
+    <EmbeddedResource Include="Web\browse.html" />
+    <EmbeddedResource Include="plugin.json" />
+  </ItemGroup>
+
+</Project>

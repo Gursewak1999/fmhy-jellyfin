@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>FMHY Free Movies - Browse</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #1a1a1a; color: #fff; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        h1 { color: #00d8a3; margin: 0; }
+        .search-box { display: flex; gap: 10px; }
+        .search-box input { padding: 12px 20px; background: #232323; border: 1px solid #444; color: #fff; border-radius: 4px; width: 300px; font-size: 16px; }
+        .search-box input:focus { outline: none; border-color: #00d8a3; }
+        .btn { padding: 12px 24px; background: #00d8a3; color: #1a1a1a; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 14px; }
+        .btn:hover { background: #00e8b3; }
+        .btn-secondary { background: #333; color: #fff; }
+        .btn-secondary:hover { background: #444; }
+        
+        .categories { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .category-btn { padding: 10px 20px; background: #232323; border: 1px solid #444; color: #fff; border-radius: 20px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .category-btn:hover, .category-btn.active { background: #00d8a3; color: #1a1a1a; border-color: #00d8a3; }
+        
+        .section { margin-bottom: 40px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { font-size: 24px; color: #fff; margin: 0; }
+        
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        .movie-card { background: #232323; border-radius: 8px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+        .movie-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        .movie-poster { width: 100%; aspect-ratio: 2/3; object-fit: cover; background: #333; }
+        .movie-info { padding: 12px; }
+        .movie-title { font-weight: 600; font-size: 14px; margin: 0 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .movie-meta { display: flex; gap: 10px; font-size: 12px; color: #aaa; }
+        .movie-source { background: #00d8a3; color: #1a1a1a; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+        .movie-quality { background: #333; padding: 2px 6px; border-radius: 3px; }
+        
+        .loading { text-align: center; padding: 40px; color: #aaa; }
+        .no-results { text-align: center; padding: 40px; color: #666; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: #232323; border-radius: 12px; padding: 30px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .modal-title { font-size: 28px; margin: 0; }
+        .modal-close { background: none; border: none; color: #aaa; font-size: 24px; cursor: pointer; padding: 0; }
+        .modal-close:hover { color: #fff; }
+        .modal-body { display: flex; gap: 30px; }
+        .modal-poster { width: 200px; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+        .modal-details { flex: 1; min-width: 0; }
+        .modal-overview { line-height: 1.6; margin-bottom: 20px; }
+        .modal-meta { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; font-size: 14px; color: #aaa; }
+        .modal-meta span { background: #333; padding: 4px 10px; border-radius: 4px; }
+        .stream-links { display: flex; flex-direction: column; gap: 10px; }
+        .stream-link { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1a1a1a; border-radius: 8px; border: 1px solid #333; }
+        .stream-link-info { display: flex; gap: 15px; align-items: center; }
+        .stream-quality { padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 12px; }
+        .stream-quality.4k { background: #e74c3c; }
+        .stream-quality.1080p { background: #3498db; }
+        .stream-quality.720p { background: #2ecc71; }
+        .stream-quality.480p { background: #f39c12; }
+        .stream-format { font-size: 12px; color: #aaa; }
+        .stream-language { font-size: 12px; color: #aaa; }
+        .stream-btn { padding: 10px 20px; background: #00d8a3; color: #1a1a1a; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .stream-btn:hover { background: #00e8b3; }
+        
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .page-btn { padding: 8px 16px; background: #232323; border: 1px solid #444; color: #fff; border-radius: 4px; cursor: pointer; }
+        .page-btn:hover { background: #333; }
+        .page-btn.active { background: #00d8a3; color: #1a1a1a; border-color: #00d8a3; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        @media (max-width: 768px) {
+            .modal-body { flex-direction: column; align-items: center; }
+            .modal-poster { width: 150px; }
+            .search-box input { width: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>FMHY Free Movies</h1>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search movies...">
+                <button class="btn" id="searchBtn">Search</button>
+            </div>
+        </div>
+        
+        <div class="categories" id="categories"></div>
+        
+        <div class="section" id="featuredSection">
+            <div class="section-header">
+                <h2 class="section-title">Featured</h2>
+            </div>
+            <div class="movie-grid" id="featuredGrid"></div>
+        </div>
+        
+        <div class="section" id="categorySection" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title" id="categoryTitle"></h2>
+            </div>
+            <div class="movie-grid" id="categoryGrid"></div>
+            <div class="pagination" id="categoryPagination"></div>
+        </div>
+        
+        <div class="section" id="searchSection" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title" id="searchTitle">Search Results</h2>
+            </div>
+            <div class="movie-grid" id="searchGrid"></div>
+            <div class="pagination" id="searchPagination"></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="movieModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <img class="modal-poster" id="modalPoster" src="" alt="">
+                <div class="modal-details">
+                    <p class="modal-overview" id="modalOverview"></p>
+                    <div class="modal-meta" id="modalMeta"></div>
+                    <div class="stream-links" id="streamLinks"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentCategory = null;
+        let currentSearchQuery = '';
+        let currentPage = 1;
+        let categories = [];
+        
+        async function loadCategories() {
+            try {
+                const response = await fetch('/FmhyPlugin/Categories');
+                categories = await response.json();
+                renderCategories();
+            } catch (error) {
+                console.error('Failed to load categories:', error);
+            }
+        }
+        
+        function renderCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+            
+            const allBtn = document.createElement('button');
+            allBtn.className = 'category-btn active';
+            allBtn.textContent = 'All';
+            allBtn.onclick = () => selectCategory(null);
+            container.appendChild(allBtn);
+            
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.textContent = cat.Name;
+                btn.onclick = () => selectCategory(cat.Id);
+                container.appendChild(btn);
+            });
+        }
+        
+        function selectCategory(categoryId) {
+            currentCategory = categoryId;
+            currentSearchQuery = '';
+            currentPage = 1;
+            document.getElementById('searchInput').value = '';
+            
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.toggle('active', 
+                    (categoryId === null && btn.textContent === 'All') ||
+                    (categoryId === btn.textContent)
+                );
+            });
+            
+            document.getElementById('featuredSection').style.display = categoryId ? 'none' : 'block';
+            document.getElementById('categorySection').style.display = categoryId ? 'block' : 'none';
+            document.getElementById('searchSection').style.display = 'none';
+            
+            if (categoryId) {
+                document.getElementById('categoryTitle').textContent = categories.find(c => c.Id === categoryId)?.Name || categoryId;
+                loadCategoryMovies(categoryId);
+            } else {
+                loadFeaturedMovies();
+            }
+        }
+        
+        async function loadFeaturedMovies() {
+            const grid = document.getElementById('featuredGrid');
+            grid.innerHTML = '<div class="loading">Loading featured movies...</div>';
+            
+            try {
+                const response = await fetch('/FmhyPlugin/Featured');
+                const movies = await response.json();
+                renderMovies(movies, grid);
+            } catch (error) {
+                grid.innerHTML = '<div class="no-results">Failed to load featured movies</div>';
+                console.error('Failed to load featured:', error);
+            }
+        }
+        
+        async function loadCategoryMovies(categoryId) {
+            const grid = document.getElementById('categoryGrid');
+            const pagination = document.getElementById('categoryPagination');
+            grid.innerHTML = '<div class="loading">Loading movies...</div>';
+            pagination.innerHTML = '';
+            
+            try {
+                const response = await fetch(`/FmhyPlugin/Category/${categoryId}`);
+                const movies = await response.json();
+                renderMovies(movies, grid);
+            } catch (error) {
+                grid.innerHTML = '<div class="no-results">Failed to load movies</div>';
+                console.error('Failed to load category:', error);
+            }
+        }
+        
+        async function searchMovies(query, page = 1) {
+            currentSearchQuery = query;
+            currentPage = page;
+            
+            document.getElementById('featuredSection').style.display = 'none';
+            document.getElementById('categorySection').style.display = 'none';
+            document.getElementById('searchSection').style.display = 'block';
+            document.getElementById('searchTitle').textContent = `Search: "${query}"`;
+            
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent === 'All');
+            });
+            currentCategory = null;
+            
+            const grid = document.getElementById('searchGrid');
+            const pagination = document.getElementById('searchPagination');
+            grid.innerHTML = '<div class="loading">Searching...</div>';
+            pagination.innerHTML = '';
+            
+            try {
+                const response = await fetch(`/FmhyPlugin/Search?query=${encodeURIComponent(query)}&page=${page}&pageSize=20`);
+                const result = await response.json();
+                renderMovies(result.Movies, grid);
+                renderPagination(result.Page, result.TotalPages, pagination, () => searchMovies(query));
+            } catch (error) {
+                grid.innerHTML = '<div class="no-results">Search failed</div>';
+                console.error('Search failed:', error);
+            }
+        }
+        
+        function renderMovies(movies, container) {
+            if (!movies || movies.length === 0) {
+                container.innerHTML = '<div class="no-results">No movies found</div>';
+                return;
+            }
+            
+            container.innerHTML = movies.map(movie => `
+                <div class="movie-card" onclick="showMovieModal('${movie.Id}')">
+                    <img class="movie-poster" src="${movie.PosterUrl || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 300%22><rect fill=%22%23333%22 width=%22200%22 height=%22300%22/><text fill=%22%23666%22 font-size=%2214%22 x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>No Image</text></svg>'}" alt="${movie.Title}">
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.Title}</div>
+                        <div class="movie-meta">
+                            <span class="movie-source">${movie.SourceName}</span>
+                            <span class="movie-quality">${movie.Quality}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderPagination(currentPage, totalPages, container, onPageChange) {
+            if (totalPages <= 1) return;
+            
+            let html = '';
+            if (currentPage > 1) {
+                html += `<button class="page-btn" onclick="${onPageChange.name}(${currentPage - 1})">Previous</button>`;
+            }
+            
+            const start = Math.max(1, currentPage - 2);
+            const end = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = start; i <= end; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="${onPageChange.name}(${i})">${i}</button>`;
+            }
+            
+            if (currentPage < totalPages) {
+                html += `<button class="page-btn" onclick="${onPageChange.name}(${currentPage + 1})">Next</button>`;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        async function showMovieModal(movieId) {
+            // Find movie from currently loaded data
+            const modal = document.getElementById('movieModal');
+            document.getElementById('modalTitle').textContent = 'Loading...';
+            document.getElementById('modalPoster').src = '';
+            document.getElementById('modalOverview').textContent = '';
+            document.getElementById('modalMeta').innerHTML = '';
+            document.getElementById('streamLinks').innerHTML = '<div class="loading">Loading stream links...</div>';
+            modal.classList.add('active');
+            
+            // We need to find the movie data - for now we'll fetch stream links directly
+            // In a real implementation, we'd cache the movie data
+        }
+        
+        function closeModal() {
+            document.getElementById('movieModal').classList.remove('active');
+        }
+        
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('movieModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+        
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) searchMovies(query);
+        });
+        
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (query) searchMovies(query);
+            }
+        });
+        
+        // Initialize
+        loadCategories();
+        loadFeaturedMovies();
+    </script>
+</body>
+</html>

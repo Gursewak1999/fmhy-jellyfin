@@ -1,0 +1,19 @@
+{
+  "Name": "FMHY Free Movies",
+  "Id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "Version": "1.0.0",
+  "Description": "Stream free movies from sources listed on fmhy.net",
+  "Author": "FMHY Plugin Developer",
+  "Website": "https://github.com/fmhy/FMHY",
+  "Type": "Plugin",
+  "RequiredJellyfinVersion": "10.9.0",
+  "AutoUpdateRepository": "https://github.com/your-repo/fmhy-jellyfin-plugin",
+  "Categories": [
+    "Metadata",
+    "Streaming",
+    "Movies"
+  ],
+  "TargetFrameworks": [
+    "net8.0"
+  ]
+}

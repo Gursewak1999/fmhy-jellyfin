@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>FMHY Free Movies Configuration</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #1a1a1a; color: #fff; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #00d8a3; margin-bottom: 30px; }
+        .section { margin-bottom: 30px; padding: 20px; background: #232323; border-radius: 8px; }
+        .section h2 { color: #00d8a3; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: #fff; border-radius: 4px; }
+        input[type="checkbox"] { margin-right: 10px; }
+        .checkbox-group { display: flex; align-items: center; }
+        .source-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .source-card { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; }
+        .source-card.enabled { border-color: #00d8a3; }
+        .source-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .source-name { font-weight: 600; color: #fff; }
+        .source-category { font-size: 12px; padding: 2px 8px; background: #00d8a3; color: #1a1a1a; border-radius: 12px; }
+        .source-info { font-size: 14px; color: #aaa; margin-bottom: 10px; }
+        .btn { padding: 10px 20px; background: #00d8a3; color: #1a1a1a; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .btn:hover { background: #00e8b3; }
+        .btn-secondary { background: #333; color: #fff; }
+        .btn-secondary:hover { background: #444; }
+        .btn-danger { background: #e74c3c; color: #fff; }
+        .btn-danger:hover { background: #f75c4c; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .toggle-all { margin-bottom: 15px; }
+        .quality-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .quality-4k { background: #e74c3c; }
+        .quality-1080p { background: #3498db; }
+        .quality-720p { background: #2ecc71; }
+        .quality-480p { background: #f39c12; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>FMHY Free Movies Configuration</h1>
+        
+        <div class="section">
+            <h2>General Settings</h2>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="showAdultContent" class="checkbox-group">
+                    Show Adult Content Sources
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="includeAnime" class="checkbox-group">
+                    Include Anime Content
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="includeTVShows" class="checkbox-group">
+                    Include TV Shows
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="includeDocumentaries" class="checkbox-group">
+                    Include Documentaries
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="autoPlayNext" class="checkbox-group">
+                    Auto Play Next Episode
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="preferredQuality">Preferred Quality</label>
+                <select id="preferredQuality">
+                    <option value="4K">4K</option>
+                    <option value="1080p" selected>1080p</option>
+                    <option value="720p">720p</option>
+                    <option value="480p">480p</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cacheDuration">Cache Duration (minutes)</label>
+                <input type="number" id="cacheDuration" value="60" min="5" max="1440">
+            </div>
+            <div class="form-group">
+                <label for="maxResults">Max Results Per Source</label>
+                <input type="number" id="maxResults" value="50" min="10" max="200">
+            </div>
+            <div class="form-group">
+                <label for="defaultLanguage">Default Language</label>
+                <input type="text" id="defaultLanguage" value="en">
+            </div>
+            <div class="form-group">
+                <label for="requestTimeout">Request Timeout (seconds)</label>
+                <input type="number" id="requestTimeout" value="30" min="5" max="120">
+            </div>
+            <div class="form-group">
+                <label for="userAgent">User Agent</label>
+                <input type="text" id="userAgent" value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="useProxy" class="checkbox-group">
+                    Use Proxy
+                </label>
+            </div>
+            <div class="form-group" id="proxyGroup" style="display: none;">
+                <label for="proxyUrl">Proxy URL</label>
+                <input type="text" id="proxyUrl" placeholder="http://proxy:port">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Streaming Sources</h2>
+            <div class="toggle-all">
+                <button class="btn" id="enableAll">Enable All</button>
+                <button class="btn btn-secondary" id="disableAll">Disable All</button>
+                <button class="btn btn-secondary" id="enableRecommended">Enable Recommended</button>
+            </div>
+            <div class="source-list" id="sourceList"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" id="saveBtn">Save Configuration</button>
+            <button class="btn btn-secondary" id="resetBtn">Reset to Defaults</button>
+        </div>
+    </div>
+
+    <script>
+        let allSources = [];
+        let config = {};
+
+        async function loadConfig() {
+            try {
+                const response = await fetch('/FmhyPlugin/Configuration');
+                config = await response.json();
+                renderSources();
+            } catch (error) {
+                console.error('Failed to load config:', error);
+            }
+        }
+
+        async function loadSources() {
+            try {
+                const response = await fetch('/FmhyPlugin/Sources');
+                allSources = await response.json();
+                renderSources();
+            } catch (error) {
+                console.error('Failed to load sources:', error);
+            }
+        }
+
+        function renderSources() {
+            const container = document.getElementById('sourceList');
+            container.innerHTML = '';
+
+            // Group by category
+            const categories = [...new Set(allSources.map(s => s.Category))];
+            
+            categories.forEach(category => {
+                const categorySources = allSources.filter(s => s.Category === category);
+                if (categorySources.length === 0) return;
+
+                const categoryDiv = document.createElement('div');
+                categoryDiv.style.gridColumn = '1 / -1';
+                categoryDiv.innerHTML = `<h3 style="color: #00d8a3; margin: 20px 0 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">${getCategoryName(category)}</h3>`;
+                container.appendChild(categoryDiv);
+
+                categorySources.forEach(source => {
+                    const enabled = config.EnabledSources?.some(es => es.Id === source.Id && es.IsEnabled) ?? source.IsEnabled;
+                    const card = document.createElement('div');
+                    card.className = `source-card ${enabled ? 'enabled' : ''}`;
+                    card.dataset.id = source.Id;
+                    
+                    card.innerHTML = `
+                        <div class="source-header">
+                            <span class="source-name">${source.Name}</span>
+                            <span class="source-category">${category}</span>
+                        </div>
+                        <div class="source-info">${source.Description}</div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                            <span class="quality-badge quality-${source.Quality.toLowerCase()}">${source.Quality}</span>
+                            ${source.HasAutoNext ? '<span style="font-size: 12px; color: #00d8a3;">⏯ Auto-Next</span>' : ''}
+                        </div>
+                        <div class="checkbox-group" style="margin-top: 10px;">
+                            <input type="checkbox" ${enabled ? 'checked' : ''} onchange="toggleSource('${source.Id}', this.checked)">
+                            <label>Enabled</label>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'aggregator': 'Stream Aggregators',
+                'pstream': 'P-Stream Forks',
+                'dedicated': 'Dedicated-Server',
+                'multi': 'Multi-Server',
+                'free-ads': 'Free w/ Ads (Legal)',
+                'video': 'Video Streaming',
+                'classics': 'Classics / Public Domain'
+            };
+            return names[category] || category;
+        }
+
+        function toggleSource(sourceId, enabled) {
+            const card = document.querySelector(`.source-card[data-id="${sourceId}"]`);
+            if (card) {
+                card.classList.toggle('enabled', enabled);
+            }
+        }
+
+        function getEnabledSourceIds() {
+            const checkboxes = document.querySelectorAll('.source-card input[type="checkbox"]');
+            const enabled = [];
+            checkboxes.forEach(cb => {
+                const card = cb.closest('.source-card');
+                if (cb.checked && card) {
+                    enabled.push(card.dataset.id);
+                }
+            });
+            return enabled;
+        }
+
+        function saveConfig() {
+            const enabledIds = getEnabledSourceIds();
+            
+            const newConfig = {
+                EnabledSources: allSources.map(s => ({
+                    Id: s.Id,
+                    Name: s.Name,
+                    Url: s.Url,
+                    Category: s.Category,
+                    Description: s.Description,
+                    IsEnabled: enabledIds.includes(s.Id),
+                    Quality: s.Quality,
+                    RequiresAdblock: s.RequiresAdblock,
+                    HasAutoNext: s.HasAutoNext,
+                    Language: s.Language
+                })),
+                CacheDurationMinutes: parseInt(document.getElementById('cacheDuration').value) || 60,
+                ShowAdultContent: document.getElementById('showAdultContent').checked,
+                MaxResultsPerSource: parseInt(document.getElementById('maxResults').value) || 50,
+                AutoPlayNext: document.getElementById('autoPlayNext').checked,
+                PreferredQuality: document.getElementById('preferredQuality').value,
+                UserAgent: document.getElementById('userAgent').value,
+                RequestTimeoutSeconds: parseInt(document.getElementById('requestTimeout').value) || 30,
+                UseProxy: document.getElementById('useProxy').checked,
+                ProxyUrl: document.getElementById('proxyUrl').value,
+                DefaultLanguage: document.getElementById('defaultLanguage').value,
+                IncludeAnime: document.getElementById('includeAnime').checked,
+                IncludeTVShows: document.getElementById('includeTVShows').checked,
+                IncludeDocumentaries: document.getElementById('includeDocumentaries').checked
+            };
+
+            fetch('/FmhyPlugin/Configuration', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newConfig)
+            }).then(response => {
+                if (response.ok) {
+                    alert('Configuration saved successfully!');
+                } else {
+                    alert('Failed to save configuration');
+                }
+            }).catch(error => {
+                console.error('Save error:', error);
+                alert('Error saving configuration');
+            });
+        }
+
+        function resetConfig() {
+            if (confirm('Reset to default configuration?')) {
+                document.getElementById('showAdultContent').checked = false;
+                document.getElementById('includeAnime').checked = true;
+                document.getElementById('includeTVShows').checked = true;
+                document.getElementById('includeDocumentaries').checked = true;
+                document.getElementById('autoPlayNext').checked = true;
+                document.getElementById('preferredQuality').value = '1080p';
+                document.getElementById('cacheDuration').value = 60;
+                document.getElementById('maxResults').value = 50;
+                document.getElementById('defaultLanguage').value = 'en';
+                document.getElementById('requestTimeout').value = 30;
+                document.getElementById('userAgent').value = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+                document.getElementById('useProxy').checked = false;
+                document.getElementById('proxyUrl').value = '';
+                document.getElementById('proxyGroup').style.display = 'none';
+                
+                // Enable recommended sources
+                const recommended = ['movy', 'cinejoy', 'popcornmovies', '7movies', 'flixer', 'rive', '67movies', 'tubi', 'plex', 'pluto', 'archive', 'youtube', 'vimeo'];
+                allSources.forEach(source => {
+                    const checkbox = document.querySelector(`.source-card[data-id="${source.Id}"] input[type="checkbox"]`);
+                    if (checkbox) {
+                        checkbox.checked = recommended.includes(source.Id);
+                        toggleSource(source.Id, checkbox.checked);
+                    }
+                });
+            }
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', saveConfig);
+        document.getElementById('resetBtn').addEventListener('click', resetConfig);
+        document.getElementById('enableAll').addEventListener('click', () => {
+            document.querySelectorAll('.source-card input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+                toggleSource(cb.closest('.source-card').dataset.id, true);
+            });
+        });
+        document.getElementById('disableAll').addEventListener('click', () => {
+            document.querySelectorAll('.source-card input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                toggleSource(cb.closest('.source-card').dataset.id, false);
+            });
+        });
+        document.getElementById('enableRecommended').addEventListener('click', () => {
+            const recommended = ['movy', 'cinejoy', 'popcornmovies', '7movies', 'flixer', 'rive', '67movies', 'tubi', 'plex', 'pluto', 'archive', 'youtube', 'vimeo', 'atlantic', 'nepu', 'cinecat', 'aether'];
+            document.querySelectorAll('.source-card input[type="checkbox"]').forEach(cb => {
+                const id = cb.closest('.source-card').dataset.id;
+                cb.checked = recommended.includes(id);
+                toggleSource(id, cb.checked);
+            });
+        });
+        document.getElementById('useProxy').addEventListener('change', (e) => {
+            document.getElementById('proxyGroup').style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        // Initialize
+        loadConfig();
+        loadSources();
+    </script>
+</body>
+</html>
